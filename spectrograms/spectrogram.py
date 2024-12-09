@@ -17,19 +17,19 @@ import plotly.offline as pyo
 import plotly.graph_objs as go
 from scipy.stats import mode
 
-iq_data_file = "D:/UCSC/year_4/EMforTomography/spectrograms/Cent827MHz_PowOn2.cfile"  
+iq_data_file = "/media/oshani/Shared/UBUNTU/EMforTomography/data-sandali/3tile/3tilewosandali794.cfile"
 
 # Parameters
 sampling_frequency = 20e6  # 20 MHz
-center_frequency = 827e6   # MHz
+center_frequency = 794e6   # MHz
 start_time = 2  # seconds
 end_time = 3   # seconds
 
 # Define frequency range of interest
-freq_min = 824e6
-freq_max = 826e6
+freq_min = 791e6
+freq_max = 793e6
 
-graph_title="sampling range = 20MHz,  center frequency = 827MHz,  time= from 2s to 3s, state= desktop turned on 2"
+graph_title="sampling range = 20MHz,  center frequency = 794MHz,  time= from 2s to 3s, state= desktop turned on 2"
 
 def read_iq_data(file_path):
     # Open the file and map it
@@ -85,7 +85,7 @@ min_power = np.min(Sxx_dB)  # Minimum value
 max_power = np.max(Sxx_dB)  # Maximum value
 
 # Mode calculation (across flattened array for global mode)
-mode_power = mode(Sxx_dB.flatten())[0][0]  # Mode value
+mode_power = mode(Sxx_dB, keepdims=True)
 
 # Print results
 print(f"Minimum Power (dB): {min_power}")
@@ -138,7 +138,7 @@ fig.show()
 
 
 # Frequency of interest
-target_frequency = 825e6  # 297.5 MHz
+target_frequency = 792e6  # 297.5 MHz
 
 # Find the closest frequency index
 freq_index = np.abs(frequencies_filtered - target_frequency).argmin()
@@ -150,7 +150,7 @@ power_values = Sxx_dB[freq_index, :]
 min_power = np.min(power_values)
 max_power = np.max(power_values)
 mean_power = np.mean(power_values)
-mode_power = mode(power_values)[0][0]  # Mode value
+mode_power = mode(Sxx_dB, keepdims=True)
 
 # Print results
 print(f"Frequency Bin: {frequencies_filtered[freq_index] / 1e6:.2f} MHz")
@@ -158,6 +158,26 @@ print(f"Minimum Power (dB): {min_power}")
 print(f"Maximum Power (dB): {max_power}")
 print(f"Mean Power (dB): {mean_power}")
 print(f"Mode Power (dB): {mode_power}")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # # Plot with plotly
 # trace = [go.Heatmap(
 #     x= times,
