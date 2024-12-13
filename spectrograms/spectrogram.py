@@ -48,6 +48,8 @@ def read_iq_data(file_path):
 
 # Read IQ data
 iq_data = read_iq_data(iq_data_file)
+print(iq_data[:10])  # Check the first few values of Sxx
+
 
 # Calculate start and end sample indices
 start_sample = int(start_time * sampling_frequency)
@@ -78,13 +80,13 @@ frequencies_filtered = frequencies_shifted[mask]
 Sxx_filtered = Sxx[mask, :]
 
 # Convert power to dB scale
-Sxx_dB = 10 * np.log10(Sxx_filtered + 1e-12)  # Avoid log(0) by adding a small value
+Sxx_dB = 10 * np.log10(Sxx_filtered + 1e-12)  # smoothening
 
 # Compute statistics
 min_power = np.min(Sxx_dB)  # Minimum value
 max_power = np.max(Sxx_dB)  # Maximum value
 
-# Mode calculation (across flattened array for global mode)
+# Mode calculation 
 mode_power = mode(Sxx_dB, keepdims=True)
 
 # Print results
@@ -133,7 +135,7 @@ fig.update_layout(
     template="plotly_dark"
     )
 print("done spectrogram")
-# Show the plot
+
 fig.show()
 
 
