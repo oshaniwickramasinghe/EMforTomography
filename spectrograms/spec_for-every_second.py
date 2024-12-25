@@ -5,13 +5,14 @@ import mmap
 import plotly.graph_objects as go
 from scipy.stats import mode
 
-iq_data_file = "/media/oshani/Shared/UBUNTU/EMforTomography/data-sandali/8tile/8tilewosandali827.cfile"
+file_name = "794_1t_null.cfile"
+iq_data_file = f"/media/oshani/Shared/UBUNTU/EMforTomography/794/no_object/{file_name}"
 
 # Parameters
 sampling_frequency = 20e6  # 20 MHz
-center_frequency = 827e6   # MHz
-freq_min = 824e6
-freq_max = 826e6
+center_frequency = 794e6   # MHz
+freq_min = 791e6
+freq_max = 793e6
 
 # Function to read IQ data
 def read_iq_data(file_path):
@@ -57,6 +58,8 @@ def generate_spectrogram(iq_segment, start_time, end_time, interval_index):
             x=times,
             y=frequencies_filtered,
             colorscale='Jet',
+            # zmin=-120,  # Set the minimum value for the color scale
+            # zmax=-95,     # Set the maximum value for the color scale
             colorbar=dict(title='Power (dB)')
         )
     )
@@ -72,7 +75,7 @@ def generate_spectrogram(iq_segment, start_time, end_time, interval_index):
         template="plotly_dark"
     )
     fig.show()
-    print(f"Spectrogram for interval {start_time}s to {end_time}s displayed")
+    print(f"Spectrogram for interval {start_time}s to {end_time}s displayed of {file_name}")
 
 # Main processing loop
 iq_data = read_iq_data(iq_data_file)
