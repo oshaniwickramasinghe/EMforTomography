@@ -7,6 +7,8 @@ import mmap
 import matplotlib.pyplot as plt
 from scipy import stats
 from scipy.stats import mode
+from scipy.signal import spectrogram
+
 
 # # Directory path containing .cfile files
 directory_path1 = "/media/oshani/Shared/UBUNTU/EMforTomography/893/dasun"
@@ -45,25 +47,29 @@ def read_iq_data(file_path):
     return iq_data
 
 
-def calculate_spectrogram(samples):
-    print(f"Calculating spectrogram")
-    fft_size = 1024
-    num_rows = len(samples) // fft_size
-    spectrogram = np.zeros((num_rows, fft_size))
+def compute_spectrogram(iq_segment):
+    """
+    Computes the spectrogram and filters the target frequency.
+    """
+    print("Computing spectrogram...")
+    frequencies, times, Sxx = spectrogram(
+        iq_segment,
+        fs=sampling_frequency,
+        window='hann',
+        nperseg=1024,
+        noverlap=512,
+        nfft=2048,
+        scaling='density'
+    )
 
-    # Perform FFT and calculate the spectrogram
-    for i in range(num_rows):
-        spectrogram[i, :] = 10 * np.log10(np.abs(np.fft.fftshift(np.fft.fft(samples[i * fft_size:(i+1) * fft_size]))) ** 2)
+    frequencies_shifted = frequencies + (center_frequency - sampling_frequency / 2)
 
-    # Calculate the frequency resolution
-    freq_resolution = sampling_frequency / fft_size  # Hz per bin
-    target_bin = int((target_freq - center_frequency) / freq_resolution + fft_size // 2)  # Convert to bin index
+    target_index = np.abs(frequencies_shifted - target_freq).argmin()
+    print("Spectrogram computation complete.")
 
-    # Extract the power values for the targeted MHz bin
-    target_bin_values = spectrogram[:, target_bin]
+    return times, 10 * np.log10(Sxx[target_index, :])  # Convert power to dB
+    # return times, 10 * np.log10(Sxx[target_index, :] + 1e-12)  # Convert power to dB
 
-    print(f"Calculation done")
-    return target_bin_values
 
 # Plot the signal strength of targted frequency over time
 def plot_spectrogram_for_targeted(target_bin_values, k, label):
@@ -117,9 +123,8 @@ def all_stat(sorted_cfile_files1, sorted_cfile_files2, sorted_cfile_files3):
 
     for i, cfile in enumerate(sorted_cfile_files1, start=1):
         file_path = os.path.join(directory_path1, cfile)
-        iq_data = read_iq_data(file_path)
-
-        target_bin_values = calculate_spectrogram(iq_data)
+        
+        time, target_bin_values = process_iq_data(file_path)
 
         mean_value, median_value, mode_value = stat_for_targeted(target_bin_values)
 
@@ -136,9 +141,8 @@ def all_stat(sorted_cfile_files1, sorted_cfile_files2, sorted_cfile_files3):
     
     for i, cfile in enumerate(sorted_cfile_files2, start=1):
         file_path = os.path.join(directory_path2, cfile)
-        iq_data = read_iq_data(file_path)
-
-        target_bin_values = calculate_spectrogram(iq_data)
+        
+        time, target_bin_values = process_iq_data(file_path)
 
         mean_value, median_value, mode_value = stat_for_targeted(target_bin_values)
 
@@ -156,9 +160,8 @@ def all_stat(sorted_cfile_files1, sorted_cfile_files2, sorted_cfile_files3):
     
     for i, cfile in enumerate(sorted_cfile_files3, start=1):
         file_path = os.path.join(directory_path3, cfile)
-        iq_data = read_iq_data(file_path)
-
-        target_bin_values = calculate_spectrogram(iq_data)
+        
+        time, target_bin_values = process_iq_data(file_path)
 
         mean_value, median_value, mode_value = stat_for_targeted(target_bin_values)
 
@@ -189,6 +192,35 @@ def all_stat(sorted_cfile_files1, sorted_cfile_files2, sorted_cfile_files3):
     plt.savefig(variation_output_path)
     plt.show()
 
+
+def process_iq_data(file_path, interval_duration=1):
+    """
+    Processes IQ data from a file, extracting and plotting spectrogram segments.
+    """
+    iq_data = read_iq_data(file_path)
+    total_samples = len(iq_data)
+    samples_per_interval = int(sampling_frequency * interval_duration)
+
+    interval_index = 0
+    temp_target_bin_segments=np.array([])
+    temp_time=np.array([])
+
+    while interval_index * samples_per_interval < total_samples:
+        start_sample = interval_index * samples_per_interval
+        end_sample = start_sample + samples_per_interval
+
+        # Extract segment and plot spectrogram
+        iq_segment = iq_data[start_sample:end_sample]
+        target_time, target_bin_segments=compute_spectrogram(iq_segment)
+
+        # Concatenate the computed segments to the temporary arrays
+        temp_target_bin_segments = np.concatenate((temp_target_bin_segments, target_bin_segments))
+        temp_time = np.concatenate((temp_time, target_time))
+
+
+        interval_index += 1
+
+    return temp_time,temp_target_bin_segments
 
 
 cfile_files = [f for f in os.listdir(directory_path1) if f.endswith('.cfile')]

@@ -7,6 +7,8 @@ import mmap
 import matplotlib.pyplot as plt
 from scipy import stats
 from scipy.stats import mode
+from scipy.signal import spectrogram
+
 
 # Directory path containing .cfile files
 # directory_path = "/media/oshani/Shared/UBUNTU/EMforTomography/893/no_object"
@@ -40,25 +42,29 @@ def read_iq_data(file_path):
     return iq_data
 
 
-def calculate_spectrogram(samples):
-    print(f"Calculating spectrogram")
-    fft_size = 1024
-    num_rows = len(samples) // fft_size
-    spectrogram = np.zeros((num_rows, fft_size))
+def compute_spectrogram(iq_segment):
+    """
+    Computes the spectrogram and filters the target frequency.
+    """
+    print("Computing spectrogram...")
+    frequencies, times, Sxx = spectrogram(
+        iq_segment,
+        fs=sampling_frequency,
+        window='hann',
+        nperseg=1024,
+        noverlap=512,
+        nfft=2048,
+        scaling='density'
+    )
 
-    # Perform FFT and calculate the spectrogram
-    for i in range(num_rows):
-        spectrogram[i, :] = 10 * np.log10(np.abs(np.fft.fftshift(np.fft.fft(samples[i * fft_size:(i+1) * fft_size]))) ** 2)
+    frequencies_shifted = frequencies + (center_frequency - sampling_frequency / 2)
 
-    # Calculate the frequency resolution
-    freq_resolution = sampling_frequency / fft_size  # Hz per bin
-    target_bin = int((target_freq - center_frequency) / freq_resolution + fft_size // 2)  # Convert to bin index
+    target_index = np.abs(frequencies_shifted - target_freq).argmin()
+    print("Spectrogram computation complete.")
 
-    # Extract the power values for the targeted MHz bin
-    target_bin_values = spectrogram[:, target_bin]
+    return times, 10 * np.log10(Sxx[target_index, :])  # Convert power to dB
+    # return times, 10 * np.log10(Sxx[target_index, :] + 1e-12)  # Convert power to dB
 
-    print(f"Calculation done")
-    return target_bin_values
   
 
 def stat_for_targeted(target_bin_values):
@@ -102,6 +108,46 @@ def plot_histogram_for_targeted(target_bin_values, k, label, title, alpha_mean, 
     plt.legend()
 
 
+#modifed to claculate mmm values of each segment
+def process_iq_data(file_path, interval_duration=1):
+    """
+    Processes IQ data from a file, extracting and plotting spectrogram segments.
+    """
+    iq_data = read_iq_data(file_path)
+    total_samples = len(iq_data)
+    samples_per_interval = int(sampling_frequency * interval_duration)
+
+    interval_index = 0
+    temp_target_bin_segments=np.array([])
+    temp_time=np.array([])
+
+    mean_values = []
+    median_values = []
+    mode_values = []
+
+    while interval_index * samples_per_interval < total_samples:
+        start_sample = interval_index * samples_per_interval
+        end_sample = start_sample + samples_per_interval
+
+        # Extract segment and plot spectrogram
+        iq_segment = iq_data[start_sample:end_sample]
+        target_time, target_bin_segments=compute_spectrogram(iq_segment)
+
+        mean_value, median_value, mode_value = stat_for_targeted(target_bin_segments)
+
+        mean_values.append(mean_value)
+        median_values.append(median_value)
+        mode_values.append(mode_value)
+        
+        # Concatenate the computed segments to the temporary arrays
+        temp_target_bin_segments = np.concatenate((temp_target_bin_segments, target_bin_segments))
+        temp_time = np.concatenate((temp_time, target_time))
+
+
+        interval_index += 1
+
+    # return temp_time,temp_target_bin_segments
+    return mean_values, median_values, mode_values
 
 
 # Function to process IQ data and plot statistics for every second of each file
@@ -113,38 +159,8 @@ def all_stat_for_every_second(cfile_files):
         file_path = os.path.join(directory_path, cfile)
         print(f"Processing file: {cfile}")
 
-        # Read IQ data
-        iq_data = read_iq_data(file_path)
-        total_samples = len(iq_data)
-        interval_duration = 1  # second
-        samples_per_interval = int(sampling_frequency * interval_duration)
-
-        mean_values = []
-        median_values = []
-        mode_values = []
-
-        interval_index = 0
-        while True:
-            start_sample = interval_index * samples_per_interval
-            end_sample = start_sample + samples_per_interval
-
-            if end_sample > total_samples:
-                print(f"End of file reached at interval {interval_index}. Exiting loop.")
-                break
-
-            # Extract the segment
-            iq_segment = iq_data[start_sample:end_sample]
-
-            # Calculate statistics for the target frequency
-            target_bin_values = calculate_spectrogram(iq_segment)
-
-            mean_value, median_value, mode_value = stat_for_targeted(target_bin_values)
-
-            mean_values.append(mean_value)
-            median_values.append(median_value)
-            mode_values.append(mode_value)
-
-            interval_index += 1
+        
+        mean_values , median_values, mode_values = process_iq_data(file_path)
 
         # Plot Mean values for the file
         plt.figure(figsize=(10, 5))
@@ -160,72 +176,8 @@ def all_stat_for_every_second(cfile_files):
         plt.legend()
         plt.show()
 
-        # # Plot Median values for the file
-        # plt.figure(figsize=(10, 5))
-        # plt.plot(range(1, len(median_values) + 1), median_values, label='Median', marker='o', color='green', linestyle='-')
-        # plt.xlabel('Time Interval (Seconds)', fontsize=12)
-        # plt.ylabel('Median Power (dB)', fontsize=12)
-        # plt.title(f'Median Power Variation for {cfile}', fontsize=14)
-        # plt.grid(True)
-        # plt.savefig(os.path.join(directory_path, f"median_{cfile}.png"))
-        # plt.show()
-
-        # # Plot Mode values for the file
-        # plt.figure(figsize=(10, 5))
-        # plt.plot(range(1, len(mode_values) + 1), mode_values, label='Mode', marker='o', color='blue', linestyle='-')
-        # plt.xlabel('Time Interval (Seconds)', fontsize=12)
-        # plt.ylabel('Mode Power (dB)', fontsize=12)
-        # plt.title(f'Mode Power Variation for {cfile}', fontsize=14)
-        # plt.grid(True)
-        # plt.savefig(os.path.join(directory_path, f"mode_{cfile}.png"))
-        # plt.show()
-       
 
 
-# Function to process IQ data and plot statistics for every second of each file
-def for_every_second(cfile_files):
-
-    cfile_files=['794_9t_null.cfile']
-    
-    for i, cfile in enumerate(cfile_files, start=1):
-        file_path = os.path.join(directory_path, cfile)
-        print(f"Processing file: {cfile}")
-
-        # Read IQ data
-        iq_data = read_iq_data(file_path)
-        total_samples = len(iq_data)
-        interval_duration = 0.5  # second
-        samples_per_interval = int(sampling_frequency * interval_duration)
-
-        plt.figure(figsize=(20, 12))
-        interval_index = 0
-        while True:
-            start_sample = interval_index * samples_per_interval
-            end_sample = start_sample + samples_per_interval
-
-            if end_sample > total_samples:
-                print(f"End of file reached at interval {interval_index}. Exiting loop.")
-                break
-
-            # Extract the segment
-            iq_segment = iq_data[start_sample:end_sample]
-
-            # Calculate statistics for the target frequency
-            target_bin_values = calculate_spectrogram(iq_segment)
-
-            # plt.figure(figsize=(20, 12))
-
-            plot_histogram_for_targeted(target_bin_values, k=interval_index, label=interval_index, title=f"{cfile}  {interval_index}", alpha_mean=0.7, alpha_median=0.7, alpha_mode=0.7)
-
-            interval_index += 1
-
-            # plt.show()
-        plt.show()
-
-    
-
-
-    
 cfile_files = [f for f in os.listdir(directory_path) if f.endswith('.cfile')]
 print(cfile_files)
 

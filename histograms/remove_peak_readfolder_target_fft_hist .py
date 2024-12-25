@@ -1,4 +1,4 @@
-# for 891 frequency 
+# not working  for 891 frequency 
 import os
 import numpy as np
 import mmap
