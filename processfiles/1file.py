@@ -60,6 +60,14 @@ def compute_spectrogram(iq_segment):
 
 
 def plot_spectrogram_for_targeted(time, target_bin_values):
+
+    print(f"plottting Type of time: {type(time)}")
+    print(f"plottting Size of time: {time.shape if isinstance(time, np.ndarray) else len(time)}")
+
+    print(f"Type of target_bin_values: {type(target_bin_values)}")
+    print(f"Size of target_bin_values: {target_bin_values.shape if isinstance(target_bin_values, np.ndarray) else len(target_bin_values)}")
+
+    time = np.arange(len(target_bin_values)) / (2*sampling_frequency)
    
     plt.plot(time, target_bin_values, linewidth=0.5, color="blue")    
     plt.xlabel("Time [s]")
@@ -132,40 +140,40 @@ def process_iq_data(file_path, interval_duration=1):
         temp_target_bin_segments = np.concatenate((temp_target_bin_segments, target_bin_segments))
         temp_time = np.concatenate((temp_time, target_time))
 
+        # Checking the type and size of the returned structures
+        print(f"Type of temp_time: {type(temp_time)}")
+        print(f"Size of temp_time: {temp_time.shape if isinstance(temp_time, np.ndarray) else len(temp_time)}")
+
+        print(f"Type of temp_target_bin_segments: {type(temp_target_bin_segments)}")
+        print(f"Size of temp_target_bin_segments: {temp_target_bin_segments.shape if isinstance(temp_target_bin_segments, np.ndarray) else len(temp_target_bin_segments)}")
+
+
+
         interval_index += 1
+    
+    # Checking the type and size of the returned structures
+    print(f"final Type of temp_time: {type(temp_time)}")
+    print(f"final Size of temp_time: {temp_time.shape if isinstance(temp_time, np.ndarray) else len(temp_time)}")
+
+    print(f"final Type of temp_target_bin_segments: {type(temp_target_bin_segments)}")
+    print(f"final Size of temp_target_bin_segments: {temp_target_bin_segments.shape if isinstance(temp_target_bin_segments, np.ndarray) else len(temp_target_bin_segments)}")
+
+
 
     return temp_time,temp_target_bin_segments
 
-
-def plot_for_eachfile(cfile_files):
-
-    # Loop through all the files and read the IQ data
-    for i, cfile in enumerate(cfile_files, start=1):
-        file_path = os.path.join(directory_path, cfile)
-        
-        time, target_bin_values= process_iq_data(file_path)
-        
-        plt.figure(figsize=(20, 12))
-
-        # plot_histogram_for_targeted(target_bin_values, i, label=f"{i*2} feet") 
-        plot_histogram_for_targeted(target_bin_values, i, label=f"{i*2} feet", title=f"Histogram of Power Values at {target_freq / 1e6} MHz", alpha_mean=0.7, alpha_median=0.7, alpha_mode=0.7) 
-        # plot_spectrogram_for_targeted(target_bin_values, i, label=f"{i*2} feet")  
-
-        print("done  ", i)
-        
-        # Save the variation plot
-        output_path = os.path.join(directory_path, f"hist{cfile}.png")
-        # output_path = os.path.join(directory_path, f"spec{cfile}.png")
-
-        plt.savefig(output_path)
-
-        
-        # plt.show()
 
 
 file_path = os.path.join(directory_path, file_name)
         
 time, target_bin_values= process_iq_data(file_path)
+
+print(f"Type of time: {type(time)}")
+print(f"Size of time: {time.shape if isinstance(time, np.ndarray) else len(time)}")
+
+print(f"Type of target_bin_values: {type(target_bin_values)}")
+print(f"Size of target_bin_values: {target_bin_values.shape if isinstance(target_bin_values, np.ndarray) else len(target_bin_values)}")
+
 
 plt.figure(figsize=(20, 12))
 
@@ -176,3 +184,6 @@ plot_spectrogram_for_targeted(time, target_bin_values)
 output_path = os.path.join(directory_path, f"hist{file_name}.pdf")
 plt.savefig(output_path)        
 plt.show()
+
+
+

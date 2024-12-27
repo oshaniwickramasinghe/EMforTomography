@@ -6,8 +6,6 @@ import os
 import numpy as np
 import mmap
 import matplotlib.pyplot as plt
-from scipy import stats
-from scipy.stats import mode
 from scipy.signal import spectrogram
 
 
@@ -217,8 +215,8 @@ def allin1plot(cfile_files):
 
 
         # plot_histogram_for_targeted(target_bin_values, i, label=f"{i*2} feet")  
-        # plot_histogram_for_targeted(target_bin_values, i, label=f"{i*2} feet", title=f"Histogram of Power Values at {target_freq / 1e6} MHz", alpha_mean=0.7, alpha_median=0.7, alpha_mode=0.7)
-        plot_spectrogram_for_targeted(time, target_bin_values, label=f"{i*2} feet", color="blue")          
+        plot_histogram_for_targeted(target_bin_values, i, label=f"{i*2} feet", title=f"Histogram of Power Values at {target_freq / 1e6} MHz", alpha_mean=0.7, alpha_median=0.7, alpha_mode=0.7)
+        # plot_spectrogram_for_targeted(time, target_bin_values, label=f"{i*2} feet", color="blue")          
         
         print("done  ", i)
         
