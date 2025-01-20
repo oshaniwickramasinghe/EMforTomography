@@ -1,36 +1,27 @@
-import os
 import numpy as np
-import mmap
 import matplotlib.pyplot as plt
 from scipy.signal import spectrogram
+import mmap
 
+# File paths
+iq_data_file1 = "/media/oshani/Shared/UBUNTU/EMforTomography/794/dasun/794_3t.cfile"
+iq_data_file2 = "/media/oshani/Shared/UBUNTU/EMforTomography/893/no_object/893_3t_null.cfile"
 
-# Directory path containing .cfile files
-# directory_path = "/media/oshani/Shared/UBUNTU/EMforTomography/893/no_object"
+# Parameters
+sampling_frequency = 20e6  # Hz
+center_frequency = 893e6  # Hz
 
-# # Parameters  Hz
-# sampling_frequency = 20e6  
-# center_frequency = 893e6  
-# target_freq = 891e6
+target_freq = 890e6
 
-
-# directory_path = "/media/oshani/Shared/UBUNTU/EMforTomography/827/no_object"
-# sampling_frequency = 20e6  
-# center_frequency = 827e6  
-# target_freq = 825e6
-
-# directory_path = "/media/oshani/Shared/UBUNTU/EMforTomography/794/no_object"
-# sampling_frequency = 20e6  
-# center_frequency = 794e6  
-# target_freq = 792e6
-
-directory_path = "/media/oshani/Shared/UBUNTU/EMforTomography/794_noob_filtered"
-sampling_frequency = 20e6  
-center_frequency = 794e6  
-target_freq = 792e6
-
+start_time1 = 0
+end_time1 = 3
+start_time2 = 0
+end_time2 = 3
 
 def read_iq_data(file_path):
+    """
+    Reads IQ data from a binary file and converts it to complex values.
+    """
     print(f"Reading IQ data from: {file_path}")
     with open(file_path, "rb") as f:
         with mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ) as mm:
@@ -41,6 +32,14 @@ def read_iq_data(file_path):
     print("Finished reading IQ data.")
     return iq_data
 
+
+def extract_segment(iq_data, start_time, end_time, sampling_frequency):
+    """
+    Extracts a specific time segment from IQ data.
+    """
+    start_sample = int(start_time * sampling_frequency)
+    end_sample = int(end_time * sampling_frequency)
+    return iq_data[start_sample:end_sample]
 
 def compute_spectrogram(iq_segment):
     """
@@ -62,18 +61,15 @@ def compute_spectrogram(iq_segment):
     target_index = np.abs(frequencies_shifted - target_freq).argmin()
     print("Spectrogram computation complete.")
 
+    # Checking the type and size of the returned structures
+    print(f"Type of times: {type(times)}")
+    print(f"Size of times: {times.shape if isinstance(times, np.ndarray) else len(times)}")
+
+    print(f"Type of Sxx: {type(Sxx)}")
+    print(f"Size of Sxx: {Sxx.shape if isinstance(Sxx, np.ndarray) else len(Sxx)}")
+
+
     return times, 10 * np.log10(Sxx[target_index, :])  # Convert power to dB
-    # return times, 10 * np.log10(Sxx[target_index, :] + 1e-12)  # Convert power to dB
-
-
-def plot_spectrogram_for_targeted(time, target_bin_values, label, color):
-   
-    plt.plot(time, target_bin_values, linewidth=0.5, label=label, color=color)    
-    plt.xlabel("Time [s]")
-    plt.ylabel("Signal Strength [dB]")
-    plt.title(f"Signal Strength at {target_freq / 1e6} MHz")
-    plt.grid(True)
-    plt.legend()
 
 def process_iq_data(file_path, interval_duration=1):
     """
@@ -105,6 +101,7 @@ def process_iq_data(file_path, interval_duration=1):
     return temp_time,temp_target_bin_segments
 
 
+
 def stat_for_targeted(target_bin_values):
     no_of_bins  = int(np.sqrt(len(target_bin_values)))
     print(no_of_bins)
@@ -125,12 +122,25 @@ def stat_for_targeted(target_bin_values):
 
     return mean_value, median_value, mode_value
 
-def plot_histogram_for_targeted(target_bin_values, k, label, title, alpha_mean, alpha_median, alpha_mode):
+def plot_spectrogram(time, target_bin_values, label, color):
+
+    time = np.arange(len(target_bin_values)) / (2*sampling_frequency)
+
+   
+    plt.plot(time, target_bin_values, linewidth=0.5, label=label, color=color)    
+    plt.xlabel("Time [s]")
+    plt.ylabel("Signal Strength [dB]")
+    plt.title(f"Signal Strength at {target_freq / 1e6} MHz")
+    plt.grid(True)
+    plt.legend()
+
+
+#provide title whether this mark mean,median, mode or none
+def plot_histogram_for_targeted(target_bin_values, title, alpha_mean, alpha_median, alpha_mode):
     no_of_bins = int(np.sqrt(len(target_bin_values)))
     print(no_of_bins)
 
-    # Plot the histogram with the specified alpha value
-    plt.hist(target_bin_values, bins=no_of_bins, alpha=0.7, label=label)
+    plt.hist(target_bin_values, bins=no_of_bins, alpha=0.7)
     plt.xlabel("Power (dB)")
     plt.ylabel("Frequency")
     plt.title(title)
@@ -146,34 +156,18 @@ def plot_histogram_for_targeted(target_bin_values, k, label, title, alpha_mean, 
     plt.legend()
 
 
-def allin1plot(cfile_files):
 
-    plt.figure(figsize=(20, 12))
+time1,target_bin1=process_iq_data(iq_data_file1)
+time2,target_bin2=process_iq_data(iq_data_file2)
 
-    # Loop through all the files and read the IQ data
-    for i, cfile in enumerate(cfile_files, start=1):
-        file_path = os.path.join(directory_path, cfile)
+plt.figure(figsize=(20, 10))
 
-        time, target_bin_values = process_iq_data(file_path)
+# plot_spectrogram(time1,target_bin1, label="with", color="blue")
+# plot_spectrogram(time2,target_bin2, label="without", color="orange")
+
+plot_histogram_for_targeted(target_bin1, title="test", alpha_mean=0.7, alpha_median=0.7, alpha_mode=0.7)
+plot_histogram_for_targeted(target_bin2, title="test", alpha_mean=0.7, alpha_median=0.7, alpha_mode=0.7)
 
 
-        # plot_histogram_for_targeted(target_bin_values, i, label=f"{i*2} feet")  
-        plot_histogram_for_targeted(target_bin_values, i, label=f"{i*2} feet", title=f"Histogram of Power Values at {target_freq / 1e6} MHz", alpha_mean=0.7, alpha_median=0.7, alpha_mode=0.7)
-        # plot_spectrogram_for_targeted(time, target_bin_values, label=f"{i*2} feet", color="blue")          
-        
-        print("done  ", i)
-        
-    # Save the variation plot
-    variation_output_path = os.path.join(directory_path, "histogram.png")
-    plt.savefig(variation_output_path)
-    plt.show() 
-    
 
-cfile_files = [f for f in os.listdir(directory_path) if f.endswith('.cfile')]
-print(cfile_files)
-
-sorted_cfile_files = sorted(cfile_files, key=lambda x: int(x.split('_')[2].split('t')[0]))
-
-print(sorted_cfile_files)
-
-allin1plot(sorted_cfile_files)
+plt.show()

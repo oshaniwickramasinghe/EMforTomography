@@ -8,8 +8,8 @@ from scipy.signal import spectrogram
 
 
 # Directory path containing .cfile files
-file_name = "60s.cfile"
-directory_path = f"/media/oshani/Shared/windows/GNU plots/timeVSsize"
+file_name = "893_5t_null.cfile"
+directory_path = f"/media/oshani/Shared/UBUNTU/EMforTomography/893/no_object"
 
 # Parameters  Hz
 sampling_frequency = 20e6  
@@ -177,8 +177,8 @@ print(f"Size of target_bin_values: {target_bin_values.shape if isinstance(target
 
 plt.figure(figsize=(20, 12))
 
-plot_histogram_for_targeted(target_bin_values, title=f"Histogram of Power Values at {target_freq / 1e6} MHz", alpha_mean=0.7, alpha_median=0.7, alpha_mode=0.7) 
-# plot_spectrogram_for_targeted(time, target_bin_values)  
+# plot_histogram_for_targeted(target_bin_values, title=f"Histogram of Power Values at {target_freq / 1e6} MHz", alpha_mean=0.7, alpha_median=0.7, alpha_mode=0.7) 
+plot_spectrogram_for_targeted(time, target_bin_values)  
 
 
 output_path = os.path.join(directory_path, f"hist{file_name}.pdf")

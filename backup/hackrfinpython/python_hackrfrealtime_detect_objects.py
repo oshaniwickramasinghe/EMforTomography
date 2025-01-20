@@ -164,7 +164,7 @@ import time
 from scipy.signal import spectrogram
 from collections import deque
 
-recording_time = 0.5  # seconds
+recording_time = 1  # seconds
 calibration_time = 30  # seconds
 center_freq = 794e6  # Hz
 sample_rate = 20e6

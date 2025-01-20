@@ -5,30 +5,12 @@ import matplotlib.pyplot as plt
 from scipy.signal import spectrogram
 
 
-# Directory path containing .cfile files
-# directory_path = "/media/oshani/Shared/UBUNTU/EMforTomography/893/no_object"
+directory_path1 = "/media/oshani/Shared/UBUNTU/EMforTomography/30s_794_nirasha_researchlab/withNirasha"
+directory_path2 = "/media/oshani/Shared/UBUNTU/EMforTomography/30s_794_nirasha_researchlab/withoutNirasha"
 
-# # Parameters  Hz
-# sampling_frequency = 20e6  
-# center_frequency = 893e6  
-# target_freq = 891e6
-
-
-# directory_path = "/media/oshani/Shared/UBUNTU/EMforTomography/827/no_object"
-# sampling_frequency = 20e6  
-# center_frequency = 827e6  
-# target_freq = 825e6
-
-# directory_path = "/media/oshani/Shared/UBUNTU/EMforTomography/794/no_object"
-# sampling_frequency = 20e6  
-# center_frequency = 794e6  
-# target_freq = 792e6
-
-directory_path = "/media/oshani/Shared/UBUNTU/EMforTomography/794_noob_filtered"
 sampling_frequency = 20e6  
 center_frequency = 794e6  
 target_freq = 792e6
-
 
 def read_iq_data(file_path):
     print(f"Reading IQ data from: {file_path}")
@@ -125,7 +107,7 @@ def stat_for_targeted(target_bin_values):
 
     return mean_value, median_value, mode_value
 
-def plot_histogram_for_targeted(target_bin_values, k, label, title, alpha_mean, alpha_median, alpha_mode):
+def plot_stat_for_targeted(target_bin_values, k, label, title, alpha_mean, alpha_median, alpha_mode):
     no_of_bins = int(np.sqrt(len(target_bin_values)))
     print(no_of_bins)
 
@@ -146,9 +128,9 @@ def plot_histogram_for_targeted(target_bin_values, k, label, title, alpha_mean, 
     plt.legend()
 
 
-def allin1plot(cfile_files):
+def allin1plot(cfile_files, directory_path):
 
-    plt.figure(figsize=(20, 12))
+    # plt.figure(figsize=(20, 12))
 
     # Loop through all the files and read the IQ data
     for i, cfile in enumerate(cfile_files, start=1):
@@ -158,7 +140,7 @@ def allin1plot(cfile_files):
 
 
         # plot_histogram_for_targeted(target_bin_values, i, label=f"{i*2} feet")  
-        plot_histogram_for_targeted(target_bin_values, i, label=f"{i*2} feet", title=f"Histogram of Power Values at {target_freq / 1e6} MHz", alpha_mean=0.7, alpha_median=0.7, alpha_mode=0.7)
+        plot_stat_for_targeted(target_bin_values, i, label=f"{i*2} feet", title=f"Histogram of Power Values at {target_freq / 1e6} MHz", alpha_mean=0.7, alpha_median=0.7, alpha_mode=0.7)
         # plot_spectrogram_for_targeted(time, target_bin_values, label=f"{i*2} feet", color="blue")          
         
         print("done  ", i)
@@ -166,14 +148,21 @@ def allin1plot(cfile_files):
     # Save the variation plot
     variation_output_path = os.path.join(directory_path, "histogram.png")
     plt.savefig(variation_output_path)
-    plt.show() 
+    # plt.show() 
     
 
-cfile_files = [f for f in os.listdir(directory_path) if f.endswith('.cfile')]
-print(cfile_files)
+cfile_files1 = [f for f in os.listdir(directory_path1) if f.endswith('.cfile')]
+print(cfile_files1)
+sorted_cfile_files1= sorted(cfile_files1, key=lambda x: int(x.split('_')[1].split('f')[0]))
+print(sorted_cfile_files1)
 
-sorted_cfile_files = sorted(cfile_files, key=lambda x: int(x.split('_')[2].split('t')[0]))
+cfile_files2 = [f for f in os.listdir(directory_path2) if f.endswith('.cfile')]
+print(cfile_files2)
+sorted_cfile_files2= sorted(cfile_files2, key=lambda x: int(x.split('_')[1].split('f')[0]))
+print(sorted_cfile_files2)
 
-print(sorted_cfile_files)
+plt.figure(figsize=(20, 12))
+allin1plot(sorted_cfile_files1, directory_path1)
+allin1plot(sorted_cfile_files2, directory_path2)
 
-allin1plot(sorted_cfile_files)
+plt.show() 
