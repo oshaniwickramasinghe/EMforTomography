@@ -24,7 +24,7 @@ from scipy.signal import spectrogram
 # center_frequency = 794e6  
 # target_freq = 792e6
 
-directory_path = "/media/oshani/Shared/UBUNTU/EMforTomography/794_noob_filtered"
+directory_path = "/media/oshani/Shared/UBUNTU/EMforTomography/waru/794/withoutwaru/use"
 sampling_frequency = 20e6  
 center_frequency = 794e6  
 target_freq = 792e6
@@ -67,7 +67,6 @@ def compute_spectrogram(iq_segment):
 
 
 def plot_spectrogram_for_targeted(time, target_bin_values, label, color):
-   
     plt.plot(time, target_bin_values, linewidth=0.5, label=label, color=color)    
     plt.xlabel("Time [s]")
     plt.ylabel("Signal Strength [dB]")
@@ -98,7 +97,6 @@ def process_iq_data(file_path, interval_duration=1):
         # Concatenate the computed segments to the temporary arrays
         temp_target_bin_segments = np.concatenate((temp_target_bin_segments, target_bin_segments))
         temp_time = np.concatenate((temp_time, target_time))
-
 
         interval_index += 1
 
@@ -131,7 +129,7 @@ def plot_histogram_for_targeted(target_bin_values, k, label, title, alpha_mean, 
 
     # Plot the histogram with the specified alpha value
     plt.hist(target_bin_values, bins=no_of_bins, alpha=0.7, label=label)
-    plt.xlabel("Power (dB)")
+    plt.xlabel("Power (dBm)")
     plt.ylabel("Frequency")
     plt.title(title)
     plt.grid(True)
@@ -144,6 +142,7 @@ def plot_histogram_for_targeted(target_bin_values, k, label, title, alpha_mean, 
     plt.axvline(mode_value, color='blue', alpha=alpha_mode, linestyle='dashed', linewidth=2, label=f"Mode: {mode_value:.2f} dB")
 
     plt.legend()
+    plt.show()
 
 
 def allin1plot(cfile_files):
@@ -159,7 +158,7 @@ def allin1plot(cfile_files):
 
         # plot_histogram_for_targeted(target_bin_values, i, label=f"{i*2} feet")  
         plot_histogram_for_targeted(target_bin_values, i, label=f"{i*2} feet", title=f"Histogram of Power Values at {target_freq / 1e6} MHz", alpha_mean=0.7, alpha_median=0.7, alpha_mode=0.7)
-        # plot_spectrogram_for_targeted(time, target_bin_values, label=f"{i*2} feet", color="blue")          
+        # plot_spectrogram_for_targeted(time, target_bin_values, label=f"{i*2} feet", color='blue')          
         
         print("done  ", i)
         
@@ -172,7 +171,7 @@ def allin1plot(cfile_files):
 cfile_files = [f for f in os.listdir(directory_path) if f.endswith('.cfile')]
 print(cfile_files)
 
-sorted_cfile_files = sorted(cfile_files, key=lambda x: int(x.split('_')[2].split('t')[0]))
+sorted_cfile_files = sorted(cfile_files, key=lambda x: int(x.split('_')[1].split('f')[0]))
 
 print(sorted_cfile_files)
 

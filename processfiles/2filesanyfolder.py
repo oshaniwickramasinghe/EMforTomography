@@ -4,24 +4,21 @@ from scipy.signal import spectrogram
 import mmap
 
 # File paths
-iq_data_file1 = "/media/oshani/Shared/UBUNTU/EMforTomography/794/dasun/794_3t.cfile"
-iq_data_file2 = "/media/oshani/Shared/UBUNTU/EMforTomography/893/no_object/893_3t_null.cfile"
+iq_data_file1 = "/media/oshani/Transcend/dec_20_rooftop/794/dasun/794_8t.cfile"
+iq_data_file2 = "/media/oshani/Transcend/dec_20_rooftop/794/no_object/794_8t_null.cfile"
 
 # Parameters
 sampling_frequency = 20e6  # Hz
-center_frequency = 893e6  # Hz
+center_frequency = 794e6  # Hz
 
-target_freq = 890e6
+target_freq = 792e6
 
-start_time1 = 0
-end_time1 = 3
-start_time2 = 0
-end_time2 = 3
+start_time1 = 5
+end_time1 = 25
+start_time2 = 5
+end_time2 = 25
 
 def read_iq_data(file_path):
-    """
-    Reads IQ data from a binary file and converts it to complex values.
-    """
     print(f"Reading IQ data from: {file_path}")
     with open(file_path, "rb") as f:
         with mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ) as mm:
@@ -41,10 +38,8 @@ def extract_segment(iq_data, start_time, end_time, sampling_frequency):
     end_sample = int(end_time * sampling_frequency)
     return iq_data[start_sample:end_sample]
 
+#Computes the spectrogram and filters the target frequency.
 def compute_spectrogram(iq_segment):
-    """
-    Computes the spectrogram and filters the target frequency.
-    """
     print("Computing spectrogram...")
     frequencies, times, Sxx = spectrogram(
         iq_segment,
@@ -60,14 +55,6 @@ def compute_spectrogram(iq_segment):
 
     target_index = np.abs(frequencies_shifted - target_freq).argmin()
     print("Spectrogram computation complete.")
-
-    # Checking the type and size of the returned structures
-    print(f"Type of times: {type(times)}")
-    print(f"Size of times: {times.shape if isinstance(times, np.ndarray) else len(times)}")
-
-    print(f"Type of Sxx: {type(Sxx)}")
-    print(f"Size of Sxx: {Sxx.shape if isinstance(Sxx, np.ndarray) else len(Sxx)}")
-
 
     return times, 10 * np.log10(Sxx[target_index, :])  # Convert power to dB
 
@@ -94,7 +81,6 @@ def process_iq_data(file_path, interval_duration=1):
         # Concatenate the computed segments to the temporary arrays
         temp_target_bin_segments = np.concatenate((temp_target_bin_segments, target_bin_segments))
         temp_time = np.concatenate((temp_time, target_time))
-
 
         interval_index += 1
 
@@ -126,7 +112,6 @@ def plot_spectrogram(time, target_bin_values, label, color):
 
     time = np.arange(len(target_bin_values)) / (2*sampling_frequency)
 
-   
     plt.plot(time, target_bin_values, linewidth=0.5, label=label, color=color)    
     plt.xlabel("Time [s]")
     plt.ylabel("Signal Strength [dB]")
@@ -136,12 +121,12 @@ def plot_spectrogram(time, target_bin_values, label, color):
 
 
 #provide title whether this mark mean,median, mode or none
-def plot_histogram_for_targeted(target_bin_values, title, alpha_mean, alpha_median, alpha_mode):
+def plot_histogram_for_targeted(target_bin_values, label, title, alpha_mean, alpha_median, alpha_mode):
     no_of_bins = int(np.sqrt(len(target_bin_values)))
     print(no_of_bins)
 
-    plt.hist(target_bin_values, bins=no_of_bins, alpha=0.7)
-    plt.xlabel("Power (dB)")
+    plt.hist(target_bin_values, bins=no_of_bins, alpha=0.7, label=label)
+    plt.xlabel("Power (dBm)")
     plt.ylabel("Frequency")
     plt.title(title)
     plt.grid(True)
@@ -165,9 +150,7 @@ plt.figure(figsize=(20, 10))
 # plot_spectrogram(time1,target_bin1, label="with", color="blue")
 # plot_spectrogram(time2,target_bin2, label="without", color="orange")
 
-plot_histogram_for_targeted(target_bin1, title="test", alpha_mean=0.7, alpha_median=0.7, alpha_mode=0.7)
-plot_histogram_for_targeted(target_bin2, title="test", alpha_mean=0.7, alpha_median=0.7, alpha_mode=0.7)
-
-
+plot_histogram_for_targeted(target_bin1, label=f"with obstruction", title="Signal Strength Distribution at 792MHz With & Without Obstruction at 0.9m at Indoor open environemnt",  alpha_mean=0.7, alpha_median=0.7, alpha_mode=0.7)
+plot_histogram_for_targeted(target_bin2, label=f"without obstruction", title="Signal Strength Distribution at 792MHz With & Without Obstruction at 0.9m at Indoor open environemnt", alpha_mean=0.7, alpha_median=0.7, alpha_mode=0.7)
 
 plt.show()

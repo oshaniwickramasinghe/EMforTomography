@@ -28,8 +28,8 @@ def plot_fft(iq_data1, iq_data2, sampling_rate):
 
     # Plot FFT magnitude for both datasets
     plt.figure(figsize=(12, 6))
-    plt.plot(freqs, np.abs(fft1), color='blue', label='800MHz with stress')
-    plt.plot(freqs, np.abs(fft2), color='red', label='800MHz without stress')
+    plt.plot(freqs, np.abs(fft1), color='blue', label='792MHz with object')
+    plt.plot(freqs, np.abs(fft2), color='red', label='792MHz without object')
     
     # Adding labels and legend
     plt.xlabel("Frequency (Hz)")
@@ -40,8 +40,8 @@ def plot_fft(iq_data1, iq_data2, sampling_rate):
     plt.show()
 
 # File paths for the two data files
-file_path1 = "./chunks/01tile800MYESstrs10MB.cfile"
-file_path2 = "./chunks/01tile800MNOstrs10MB.cfile"
+file_path1 = "/media/oshani/Shared/UBUNTU/EMforTomography/waru/794/diffCPU/30s_workload10_Withobject.cfile"
+file_path2 = "/media/oshani/Shared/UBUNTU/EMforTomography/waru/794/diffCPU/30s_workload10_Withoutobject.cfile"
 
 # Read data from files
 IQlist1 = read_iq_data(file_path1)

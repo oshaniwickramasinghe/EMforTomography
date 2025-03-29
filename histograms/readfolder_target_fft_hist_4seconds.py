@@ -24,7 +24,7 @@ from scipy.signal import spectrogram
 # center_frequency = 827e6  
 # target_freq = 825e6
 
-directory_path = "/media/oshani/Shared/UBUNTU/EMforTomography/dec_20_rooftop/794/samindu"
+directory_path = "/media/oshani/Shared/UBUNTU/EMforTomography/sensorlogs/compare"
 sampling_frequency = 20e6  
 center_frequency = 794e6  
 target_freq = 792e6
@@ -153,7 +153,7 @@ def process_iq_data(file_path, interval_duration=1):
 # Function to process IQ data and plot statistics for every second of each file
 def all_stat_for_every_second(cfile_files):
 
-    # cfile_files=['794_8t_null.cfile']
+    cfile_files=['60s_1f_794_idle.cfile']
     
     for i, cfile in enumerate(cfile_files, start=1):
         file_path = os.path.join(directory_path, cfile)
@@ -183,10 +183,10 @@ def all_stat_for_every_second(cfile_files):
 cfile_files = [f for f in os.listdir(directory_path) if f.endswith('.cfile')]
 print(cfile_files)
 
-sorted_cfile_files = sorted(cfile_files, key=lambda x: int(x.split('_')[1].split('t')[0]))
+# sorted_cfile_files = sorted(cfile_files, key=lambda x: int(x.split('_')[1].split('t')[0]))
 
-print(sorted_cfile_files)
+# print(sorted_cfile_files)
 
-all_stat_for_every_second(sorted_cfile_files)
+all_stat_for_every_second(cfile_files)
 
 

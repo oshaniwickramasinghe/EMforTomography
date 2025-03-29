@@ -10,12 +10,12 @@ from scipy.signal import spectrogram
 
 
 # Directory path containing .cfile files
-directory_path = "/media/oshani/Shared/UBUNTU/EMforTomography/893/no_object"
+directory_path = "/media/oshani/Shared/UBUNTU/EMforTomography/waru/794/withoutwaru/use"
 
 # Parameters  Hz
 sampling_frequency = 20e6  
-center_frequency = 893e6  
-target_freq = 891e6
+center_frequency = 794e6  
+target_freq = 792e6
 
 
 # directory_path = "/media/oshani/Shared/UBUNTU/EMforTomography/827/no_object"
@@ -205,6 +205,8 @@ def all_stat(cfile_files):
 
 def allin1plot(cfile_files):
 
+    color = ['blue', 'red', 'green','yellow']
+
     plt.figure(figsize=(20, 12))
 
     # Loop through all the files and read the IQ data
@@ -215,8 +217,8 @@ def allin1plot(cfile_files):
 
 
         # plot_histogram_for_targeted(target_bin_values, i, label=f"{i*2} feet")  
-        plot_histogram_for_targeted(target_bin_values, i, label=f"{i*2} feet", title=f"Histogram of Power Values at {target_freq / 1e6} MHz", alpha_mean=0.7, alpha_median=0.7, alpha_mode=0.7)
-        # plot_spectrogram_for_targeted(time, target_bin_values, label=f"{i*2} feet", color="blue")          
+        # plot_histogram_for_targeted(target_bin_values, i, label=f"{i*2} feet", title=f"Histogram of Power Values at {target_freq / 1e6} MHz", alpha_mean=0.7, alpha_median=0.7, alpha_mode=0.7)
+        plot_spectrogram_for_targeted(time, target_bin_values, label=f"{i*2} feet", color=color[i-1])          
         
         print("done  ", i)
         
@@ -315,10 +317,12 @@ def plot_for_eachfile(cfile_files):
 cfile_files = [f for f in os.listdir(directory_path) if f.endswith('.cfile')]
 print(cfile_files)
 
-sorted_cfile_files = sorted(cfile_files, key=lambda x: int(x.split('_')[1].split('t')[0]))
+sorted_cfile_files = sorted(cfile_files, key=lambda x: int(x.split('_')[1].split('f')[0]))
 
 print(sorted_cfile_files)
 
+sorted_cfile_files = ['30s_3f_WOWfile.cfile','30s_4f_WOWfile.cfile','30s_5f_WOWfile.cfile','30s_6f_WOWfile.cfile']
+# sorted_cfile_files = ['30s_4f_WOWfile.cfile','30s_5f_WOWfile.cfile']
 allin1plot(sorted_cfile_files)
 # plot_for_eachfile(sorted_cfile_files)
 # all_stat(sorted_cfile_files)

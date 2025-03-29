@@ -8,7 +8,7 @@ from scipy.stats import mode
 from scipy.signal import find_peaks
 
 # Directory path containing .cfile files
-directory_path = "/media/oshani/Shared/UBUNTU/EMforTomography/893/samindu"
+directory_path = "/media/oshani/Shared/UBUNTU/EMforTomography/waru/794/waruat1feet/use"
 
 # Parameters  Hz
 sampling_frequency = 20e6  
@@ -79,6 +79,7 @@ def plot_histogram_for_targeted(target_bin_values, k, label, title, alpha_mean, 
     plt.axvline(mode_value, color='blue', alpha=alpha_mode, linestyle='dashed', linewidth=2, label=f"Mode: {mode_value:.2f} dB")
 
     plt.legend()
+    plt.show()
 
     
 
@@ -299,7 +300,7 @@ def plot_for_eachfile(cfile_files):
 cfile_files = [f for f in os.listdir(directory_path) if f.endswith('.cfile')]
 print(cfile_files)
 
-sorted_cfile_files = sorted(cfile_files, key=lambda x: int(x.split('_')[1].split('t')[0]))
+sorted_cfile_files = sorted(cfile_files, key=lambda x: int(x.split('_')[1].split('f')[0]))
 
 print(sorted_cfile_files)
 

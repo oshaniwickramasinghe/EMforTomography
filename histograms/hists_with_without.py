@@ -20,7 +20,7 @@ file_path2 = "/media/oshani/Shared/UBUNTU/EMforTomography/794/no_object"
 # Parameters  Hz
 sampling_frequency = 20e6  
 center_frequency = 794e6  
-target_freq = 792e6
+target_freq = 792e6    
 
 
 def read_iq_data(file_path):

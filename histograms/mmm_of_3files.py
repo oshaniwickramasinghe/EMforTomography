@@ -15,9 +15,9 @@ from scipy.signal import spectrogram
 # directory_path2 = "/media/oshani/Shared/UBUNTU/EMforTomography/893/samindu"
 # directory_path3 = "/media/oshani/Shared/UBUNTU/EMforTomography/893/no_object"
 # Parameters  Hz
-sampling_frequency = 20e6  
-center_frequency = 893e6  
-target_freq = 891e6
+# sampling_frequency = 20e6  
+# center_frequency = 893e6  
+# target_freq = 891e6
 
 
 # directory_path1 = "/media/oshani/Shared/UBUNTU/EMforTomography/827/dasun"
@@ -31,8 +31,9 @@ target_freq = 891e6
 # directory_path2 = "/media/oshani/Shared/UBUNTU/EMforTomography/794/samindu"
 # directory_path3 = "/media/oshani/Shared/UBUNTU/EMforTomography/794/no_object"
 
-directory_path1 = "/media/oshani/Shared/UBUNTU/EMforTomography/30s_dilanga_rooftop/794/WD"
-directory_path2 = "/media/oshani/Shared/UBUNTU/EMforTomography/30s_dilanga_rooftop/794/WOD"
+directory_path1 = "/media/oshani/Shared/UBUNTU/EMforTomography/waru/794/withoutwaru/use"
+# directory_path2 = "/media/oshani/Shared/UBUNTU/EMforTomography/waru/794/withoutwaru"
+# directory_path3 = "/media/oshani/Shared/UBUNTU/EMforTomography/ground/off"
 
 sampling_frequency = 20e6  
 center_frequency = 794e6  
@@ -108,7 +109,7 @@ def stat_for_targeted(target_bin_values):
     return mean_value, median_value, mode_value
 
 
-def all_stat(sorted_cfile_files1, sorted_cfile_files2):
+def all_stat(sorted_cfile_files1):
 
     mean_values1 = []
     median_values1 = []
@@ -139,27 +140,25 @@ def all_stat(sorted_cfile_files1, sorted_cfile_files2):
     
     
     # Plot the mean, median, and mode as a function of k (file index)
-    # plt.plot(range(1, len(sorted_cfile_files1) + 1), mean_values1, label='Mean with object1', marker='o', color='red', linestyle='-', markersize=5)
-    plt.plot(range(1, len(sorted_cfile_files1) + 1), median_values1, label='Median with object', marker='o', color='red', linestyle='-', markersize=5)
-    # plt.plot(range(1, len(sorted_cfile_files1) + 1), mode_values1, label='Mode with object1', marker='o', color='red', linestyle='-', markersize=5)
+    plt.plot(range(1, len(sorted_cfile_files1) + 1), mean_values1, label='Mean', marker='o', color='red', linestyle='-', markersize=5)
+    plt.plot(range(1, len(sorted_cfile_files1) + 1), median_values1, label='Median', marker='o', color='green', linestyle='-', markersize=5)
+    plt.plot(range(1, len(sorted_cfile_files1) + 1), mode_values1, label='Mode', marker='o', color='blue', linestyle='-', markersize=5)
     
-    for i, cfile in enumerate(sorted_cfile_files2, start=1):
-        file_path = os.path.join(directory_path2, cfile)
+    # for i, cfile in enumerate(sorted_cfile_files2, start=1):
+    #     file_path = os.path.join(directory_path2, cfile)
         
-        time, target_bin_values = process_iq_data(file_path)
+    #     time, target_bin_values = process_iq_data(file_path)
 
-        mean_value, median_value, mode_value = stat_for_targeted(target_bin_values)
+    #     mean_value, median_value, mode_value = stat_for_targeted(target_bin_values)
 
-        mean_values2.append(mean_value)
-        median_values2.append(median_value)
-        mode_values2.append(mode_value)
+    #     mean_values2.append(mean_value)
+    #     median_values2.append(median_value)
+    #     mode_values2.append(mode_value)
 
-    
-
-    # Plot the mean, median, and mode as a function of k (file index)
-    # plt.plot(range(1, len(sorted_cfile_files2) + 1), mean_values2, label='Mean with object2', marker='o', color='green', linestyle='-', markersize=5)
-    plt.plot(range(1, len(sorted_cfile_files2) + 1), median_values2, label='Median without object', marker='o', color='green', linestyle='-', markersize=5)
-    # plt.plot(range(1, len(sorted_cfile_files2) + 1), mode_values2, label='Mode with object2', marker='o', color='green', linestyle='-', markersize=5)
+    # # Plot the mean, median, and mode as a function of k (file index)
+    # # plt.plot(range(1, len(sorted_cfile_files2) + 1), mean_values2, label='Mean with object2', marker='o', color='green', linestyle='-', markersize=5)
+    # plt.plot(range(1, len(sorted_cfile_files2) + 1), median_values2, label='Median without object', marker='o', color='green', linestyle='-', markersize=5)
+    # # plt.plot(range(1, len(sorted_cfile_files2) + 1), mode_values2, label='Mode with object2', marker='o', color='green', linestyle='-', markersize=5)
     
     
     # for i, cfile in enumerate(sorted_cfile_files3, start=1):
@@ -175,25 +174,30 @@ def all_stat(sorted_cfile_files1, sorted_cfile_files2):
 
     
 
-    # Plot the mean, median, and mode as a function of k (file index)
-    # plt.plot(range(1, len(sorted_cfile_files3) + 1), mean_values3, label='Mean without object', marker='o', color='blue', linestyle='-', markersize=5)
-    # plt.plot(range(1, len(sorted_cfile_files3) + 1), median_values3, label='Median without object', marker='o', color='blue', linestyle='-', markersize=5)
-    # plt.plot(range(1, len(sorted_cfile_files3) + 1), mode_values3, label='Mode without object', marker='o', color='blue', linestyle='-', markersize=5)
+    # # Plot the mean, median, and mode as a function of k (file index)
+    # # plt.plot(range(1, len(sorted_cfile_files3) + 1), mean_values3, label='Mean without object', marker='o', color='blue', linestyle='-', markersize=5)
+    # plt.plot(range(1, len(sorted_cfile_files3) + 1), median_values3, label='Median turned off', marker='o', color='blue', linestyle='-', markersize=5)
+    # # plt.plot(range(1, len(sorted_cfile_files3) + 1), mode_values3, label='Mode without object', marker='o', color='blue', linestyle='-', markersize=5)
     
+    print("median values with : ", median_values1)
+    print("median values without : ", median_values2)
+    print("median values turned off : ", median_values3)
 
     # Add labels and title
-    plt.xlabel('File Index (k)', fontsize=12)
+    plt.xlabel('Distance (m)', fontsize=12)
     xticks = plt.gca().get_xticks()
-    plt.xticks(xticks, [2 * int(x)+4 for x in xticks])
-    plt.ylabel('Power (dB)', fontsize=12)
-    plt.title(f'Variation of Mode for {target_freq / 1e6} MHz  with Distance in feet with and without object', fontsize=14)
+    plt.xticks(xticks, [0.3 * int(x) for x in xticks])
+    # plt.xticks(xticks, [int(x)/2 for x in xticks])
+    plt.ylabel('Power (dBm)', fontsize=12)
+    # plt.title(f'Variation of Median for {target_freq / 1e6} MHz  with Distance in meters with and without object', fontsize=14)
+    plt.title(f'Variation of Mean, Median and Mode for {target_freq / 1e6} MHz  when the object is at 0.3m from the signal source', fontsize=14)
     plt.legend()
     plt.grid(True)
 
     # Save the variation plot
-    directory_path = "/media/oshani/Shared/UBUNTU/EMforTomography/30s_794_nirasha_researchlab" 
-    variation_output_path = os.path.join(directory_path, "basedonmode.png")
-    plt.savefig(variation_output_path)
+    # directory_path = "/media/oshani/Shared/UBUNTU/EMforTomography/30s_794_nirasha_researchlab" 
+    # variation_output_path = os.path.join(directory_path, "basedonmode.png")
+    # plt.savefig(variation_output_path)
     plt.show()
 
 
@@ -228,18 +232,18 @@ def process_iq_data(file_path, interval_duration=1):
 
 
 cfile_files = [f for f in os.listdir(directory_path1) if f.endswith('.cfile')]
-sorted_cfile_files1 = sorted(cfile_files, key=lambda x: int(x.split('_')[1].split('f')[0]))
+sorted_cfile_files1 = sorted(cfile_files, key=lambda x: float(x.split('_')[1].split('f')[0]))
 print(sorted_cfile_files1)
 
-cfile_files = [f for f in os.listdir(directory_path2) if f.endswith('.cfile')]
-sorted_cfile_files2 = sorted(cfile_files, key=lambda x: int(x.split('_')[1].split('f')[0]))
-print(sorted_cfile_files2)
+# cfile_files = [f for f in os.listdir(directory_path2) if f.endswith('.cfile')]
+# sorted_cfile_files2 = sorted(cfile_files, key=lambda x: float(x.split('_')[1].split('m')[0]))
+# print(sorted_cfile_files2)
 
 # cfile_files = [f for f in os.listdir(directory_path3) if f.endswith('.cfile')]
-# sorted_cfile_files3 = sorted(cfile_files, key=lambda x: int(x.split('_')[1].split('t')[0]))
+# sorted_cfile_files3 = sorted(cfile_files, key=lambda x: float(x.split('_')[1].split('m')[0]))
 # print(sorted_cfile_files3)
 
 # allin1plot(sorted_cfile_files)
 # plot_for_eachfile(sorted_cfile_files)
-all_stat(sorted_cfile_files1, sorted_cfile_files2)
+all_stat(sorted_cfile_files1)
 

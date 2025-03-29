@@ -9,9 +9,10 @@ from scipy.signal import spectrogram
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.pipeline import make_pipeline
+import time
 
-recording_time = 4  # seconds
-ignore_time = 1  # seconds
+recording_time = 10  # seconds
+ignore_time = 10  # seconds
 center_freq = 794e6  # Hz
 sample_rate = 5e6
 baseband_filter = 20e6
@@ -95,17 +96,32 @@ def estimate_distance_from_signal(model, signal_strength):
     # Solve for roots
     roots = np.roots(poly_coeffs)
 
+    # Extract polynomial degree
+    degree = len(coeffs) - 1
+
+    # Construct equation as a string
+    equation_terms = []
+    for i in range(degree, 0, -1):
+        equation_terms.append(f"{coeffs[i]:.4f} * d^{i}")
+
+    # Add the constant term
+    constant_term = coeffs[0] + intercept - signal_strength
+    equation_terms.append(f"{constant_term:.4f}")
+
+    # Join terms with plus signs
+    equation_str = " + ".join(equation_terms)
+    print(f"Polynomial equation for distance (d): {equation_str} = 0")
+
+    file.write(f"Polynomial equation for distance (d): {equation_str} = 0")
+    file.flush()
+
     for root in roots:
-        file.write(f"nonfiltered = {root:.2f} m    median signal strength = {signal_strength:.2f} dB   actual distance = \n")
-        file.flush()
+            file.write(f"\nnonfiltered = {root:.2f} m    median signal strength = {signal_strength:.2f} dB  \n")
+            file.flush()
     
     # Filter real and positive roots
     valid_distances = roots[np.isreal(roots)].real
     valid_distances = valid_distances[valid_distances >= 0]
-
-    # if valid_distances.size > 0:
-    #     return min(valid_distances)  # Return the smallest valid distance
-    # return None  # No valid solution found
 
     return valid_distances
 
@@ -113,7 +129,8 @@ def estimate_distance_from_signal(model, signal_strength):
 sdr.set_rx_callback(rx_callback)
 sdr.pyhackrf_start_rx()
 
-calibration_distances = np.array([0.3, 0.45,0.6,0.75, 0.9,1.05, 1.2,1.35, 1.5]).reshape(-1, 1)
+calibration_distances = np.array([0.3,0.9,1.5]).reshape(-1, 1)
+
 calibration_medians = []
 output_file = "localisation.txt"
 
@@ -141,9 +158,6 @@ with open(output_file, 'a') as file:
         calibration_medians = np.array(calibration_medians)
         model = train_model(calibration_distances, calibration_medians)
 
-        # file.write(f"Equation = {model} \n")
-        # file.flush()
-
         # Predict values for the equation obtained to plot the equation
         distance_range = np.linspace(min(calibration_distances), max(calibration_distances), 100).reshape(-1, 1)
         predicted_signal = model.predict(distance_range)
@@ -153,6 +167,8 @@ with open(output_file, 'a') as file:
 
         while True:
             print("Collecting real-time data for 10 seconds...")
+            start_time = time.time()  # Start timing
+
             samples[:] = 0
             last_idx = 0
             time.sleep(recording_time)
@@ -161,9 +177,6 @@ with open(output_file, 'a') as file:
             median_value = np.median(bin_values)
 
             estimated_distance = estimate_distance_from_signal(model, median_value)
-
-            # file.write(f"estimated_distance = {estimated_distance}    median signal strength = {median_value}  actual distance\n ")
-            # file.flush()
 
             for dist in estimated_distance:
                 file.write(f"estimated_distance = {dist:.2f} m    median signal strength = {median_value:.2f} dB   actual distance = \n")
@@ -177,15 +190,23 @@ with open(output_file, 'a') as file:
             if estimated_distance is not None:
                 distances_list.extend(estimated_distance)
                 medians.extend([median_value] * len(estimated_distance))
+                plot_start_time = time.time()  # Time before plotting
                 plot_real_time(distances_list, medians, calibration_distances, calibration_medians, distance_range, predicted_signal)
+                plot_end_time = time.time()  # Time after plotting
 
-                # print(f"Estimated Distance for Signal {median_value:.2f} dB: {estimated_distance:.2f} m")
+                total_time = plot_end_time - start_time
+                plot_time = plot_end_time - plot_start_time
+
+                file.write(f"Total time from data collection to plot: {total_time:.3f} seconds\n")
+                file.write(f"Time taken just for plotting: {plot_time:.3f} seconds\n")
+                file.flush()
+
             else:
                 print(f"Could not estimate distance for Signal {median_value:.2f} dB.")
 
-            if len(distances_list) >= 1:  # Only update the most recent data point
-                distances_list.pop(0)
-                medians.pop(0)
+            # if len(distances_list) >= 1:  # Only update the most recent data point
+            #     distances_list.pop(0)
+            #     medians.pop(0)
 
     except KeyboardInterrupt:
         print("Stopping data collection...")
